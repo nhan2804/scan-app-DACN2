@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Image, View, Platform, TextInput, Text } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
 import { Button, Icon } from "@rneui/themed";
 const BASE_URL =
@@ -8,6 +9,7 @@ const BASE_URL =
   "http://192.168.1.4:8888";
 export default function ImagePickerExample() {
   const [image, setImage] = useState(null);
+  const [selectedValue, setSelectedValue] = useState("RNN");
 
   const openCamera = async () => {
     // Ask the user for the permission to access the camera
@@ -84,16 +86,16 @@ export default function ImagePickerExample() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      data: { text: first, model: "RNN" },
+      data: { text: first, model: selectedValue },
     })
       .then((e) => {
         setRS(e?.data);
-        alert(e?.data);
+        // alert(e?.data);
       })
       .catch((e) => {
         alert(e?.response?.data?.message || e?.message);
       });
-  }, [first]);
+  }, [first, selectedValue]);
 
   return (
     <View
@@ -112,7 +114,7 @@ export default function ImagePickerExample() {
           marginTop: 40,
         }}
       >
-        Fake News Detection
+        News Detection
       </Text>
       <View
         style={{
@@ -122,7 +124,7 @@ export default function ImagePickerExample() {
           // backgroundColor: "yellow",
         }}
       >
-        <View style={{ marginRight: 50 }}>
+        <View style={{ marginRight: 100 }}>
           <Button
             onPress={openCamera}
             icon={{
@@ -140,7 +142,16 @@ export default function ImagePickerExample() {
               borderWidth: 2,
             }}
           />
-          <Text style={{ textAlign: "center", marginTop: 10 }}>Take Photo</Text>
+          <Text
+            style={{
+              textAlign: "center",
+              marginTop: 10,
+              fontSize: 16,
+              color: "#3C486B",
+            }}
+          >
+            Take Photo
+          </Text>
         </View>
         <View style={{ height: 150 }}>
           <Button
@@ -160,7 +171,14 @@ export default function ImagePickerExample() {
               borderWidth: 2,
             }}
           />
-          <Text style={{ textAlign: "center", marginTop: 10 }}>
+          <Text
+            style={{
+              textAlign: "center",
+              marginTop: 10,
+              fontSize: 16,
+              color: "#3C486B",
+            }}
+          >
             Choose Photo
           </Text>
         </View>
@@ -170,39 +188,72 @@ export default function ImagePickerExample() {
         style={{
           width: 400,
           height: 200,
+          borderRadius: 10,
           backgroundColor: "#F6F1F1",
+          justifyContent: "center",
+          marginBottom:10
         }}
       >
-        {image && (
+        {image ? (
           <Image
             source={{ uri: image }}
             style={{ flex: 1, width: null, height: null }}
             resizeMode="contain"
           />
+        ) : (
+          <Text
+            style={{
+              textAlign: "center",
+              fontWeight: "bold",
+              fontSize: 24,
+              color: "#146C94",
+            }}
+          >
+            Image View
+          </Text>
         )}
       </View>
-
+      <Picker
+        selectedValue={selectedValue}
+        style={{ height: 50, width: 300, color: "#3C486B" }}
+        onValueChange={(itemValue, itemIndex) => setSelectedValue(itemValue)}
+      >
+        <Picker.Item value="RNN" label="Model:  LSTM" />
+        <Picker.Item value="NB" label="Model:  Naive Bayes" />
+        <Picker.Item value="DT" label="Model:  Decision Tree" />
+        <Picker.Item value="SVM" label="Model:  SVM" />
+      </Picker>
       {first && (
         <TextInput
-          style={{ width: 400, height: 200, backgroundColor: "#F6F1F1" }}
+          style={{
+            marginTop: 10,
+            marginBottom: 20,
+            width: 400,
+            height: 200,
+            backgroundColor: "#F6F1F1",
+            padding: 5,
+            borderRadius: 10,
+            color: "#222222",
+            textAlign: "center",
+          }}
           value={first}
           numberOfLines={10}
           multiline={true}
         />
       )}
       {rs && (
-        <Text style={{ fontSize: 32, fontWeight: "bold" }}>
-          Predict:
+        <Text style={{ fontSize: 24, fontWeight: "bold", color: "#146C94" }}>
+          Predict:{" "}
           {rs.split(";")[0] === "0"
             ? "Real"
             : rs.split(";")[0] === "2"
             ? "No Text Selected"
-            : "Fake"}
+            : "Unsubstantiated"}
         </Text>
       )}
       {rs && (
-        <Text style={{ fontSize: 32, fontWeight: "bold" }}>
-          TOPIC:{rs.split(";")[1]}
+        <Text style={{ fontSize: 24, fontWeight: "bold", color: "#146C94" }}>
+          Topic: {rs.split(";")[1]}
         </Text>
       )}
     </View>
