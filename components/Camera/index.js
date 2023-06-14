@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Button, Image, View, Platform, TextInput } from "react-native";
+import { Button, Image, View, Platform, TextInput, Text } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 const BASE_URL =
-  "https://e3cc-2001-ee0-4c4c-9510-f490-27d6-4a18-556f.ngrok-free.app";
+  "https://1139-2001-ee0-4c76-8c40-4167-7a93-1e27-8151.ngrok-free.app/";
 export default function ImagePickerExample() {
   const [image, setImage] = useState(null);
 
@@ -16,7 +16,9 @@ export default function ImagePickerExample() {
       return;
     }
 
-    const result = await ImagePicker.launchCameraAsync({});
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+    });
 
     // Explore the result
     console.log(result);
@@ -31,7 +33,7 @@ export default function ImagePickerExample() {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [4, 3],
+      // aspect: [4, 3],
       quality: 1,
     });
 
@@ -51,6 +53,7 @@ export default function ImagePickerExample() {
       name: "image.jpg",
       type: "image/jpeg",
     });
+    datas.append("text", "Nhaan test");
     axios({
       method: "POST",
       url: BASE_URL + "/api/upload",
@@ -75,13 +78,19 @@ export default function ImagePickerExample() {
 
     datas.append("text", first);
     datas.append("model", "RNN");
+
     axios({
       method: "POST",
       url: BASE_URL + "/api/predict",
-      data: datas,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      data: { text: first, model: "RNN" },
     })
       .then((e) => {
         setRS(e?.data);
+        alert(e?.data || "oke");
       })
       .catch((e) => {
         alert(e?.response?.data?.message || e?.message);
@@ -90,12 +99,21 @@ export default function ImagePickerExample() {
 
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Button title="Pick an image from camera roll" onPress={pickImage} />
+      <Button title="Pick an image from camera rolls" onPress={pickImage} />
       <Button title="With camera " onPress={openCamera} />
       {image && (
         <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
       )}
       {first && <TextInput value={first} numberOfLines={10} multiline={true} />}
+      {rs && (
+        <Text>
+          {rs.split(";")[0] === "0"
+            ? "Real"
+            : rs.split(";")[0] === "2"
+            ? "No Text Selected"
+            : "Fake"}
+        </Text>
+      )}
     </View>
   );
 }
